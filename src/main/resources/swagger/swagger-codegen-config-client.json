@@ -1,0 +1,11 @@
+{
+	"modelPackage": "org.ownbit.solrspring.client.generated.model",
+	"apiPackage": "org.ownbit.solrspring.client.generated.api",
+	"invokerPackage": "org.ownbit.solrspring.client.generated",
+	"groupId": "org.ownbit",
+	"artifactId": "solrspring",
+	"library": "resttemplate",
+	"useBeanValidation": true,
+	"serializableModel": true,
+	"hideGenerationTimestamp": true
+}

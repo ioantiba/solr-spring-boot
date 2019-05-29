@@ -1,0 +1,98 @@
+plugins {
+	id 'org.springframework.boot' version '2.1.5.RELEASE'
+	id 'java'
+	id "org.hidetake.swagger.generator" version "2.18.1"
+	//https://github.com/int128/gradle-swagger-generator-plugin
+}
+
+ext {
+	swaggerCodegenVersion = '3.0.8'
+	swaggerAnnotationsV3 = '2.0.8'
+	swaggerAnnotationsV1 = '1.5.22'
+	springfoxVersion = '2.9.2'
+	openapiGeneratorVersion = '3.3.4'
+}
+
+apply plugin: 'io.spring.dependency-management'
+
+group = 'org.ownbit'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '1.8'
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	implementation 'org.springframework.boot:spring-boot-starter-data-rest'
+	implementation 'org.springframework.boot:spring-boot-starter-data-solr'
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	
+	//Generate Stubs using Swagger3
+	swaggerCodegen "io.swagger.codegen.v3:swagger-codegen-cli:${swaggerCodegenVersion}"
+	compileOnly "io.swagger:swagger-annotations:${swaggerAnnotationsV1}"
+	
+	//Generate Stubs using OpenAPI
+	//implementation "io.swagger.core.v3:swagger-annotations:${swaggerAnnotationsV3}"
+    //implementation "io.springfox:springfox-swagger2:${springfoxVersion}"
+    //swaggerCodegen "org.openapitools:openapi-generator-cli:${openapiGeneratorVersion}"
+    
+    //Client Dependencies
+    //implementation "org.springframework:spring-context:${springVersion}"
+	//implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
+	//implementation "javax.validation:validation-api:${validationApiVersion}"
+	//implementation "com.github.joschi.jackson:jackson-datatype-threetenbp:${jacksonDatatypeThreetenbpVersion}"
+}
+
+swaggerSources {
+  def swaggerResourcesFolder = "$rootDir/src/main/resources/swagger"
+  def restServiceFile = "basic-services.yml"
+  
+  basicapi {
+    inputFile = file("$swaggerResourcesFolder/$restServiceFile")
+    code {
+      language = 'spring'
+      configFile = file("$swaggerResourcesFolder/swagger-codegen-config.json")
+      // generate only User and Pet models ->  components = [models: ['User', 'Pet']]
+      // generate only APIs (without tests) -> components = [apis: true, apiTests: false]
+      //components = ['models', 'apis', 'supportingFiles'] //Used with OpenAPI generator
+      components = ['models', 'apis']
+      
+      doLast {
+      	def baseBuildPackage = "$buildDir/swagger-code-basicapi/src/main/java"
+      	def basePackage = "$baseBuildPackage/org/ownbit/solrspring/generated"
+      	delete fileTree("$basePackage/api") {
+        	include '*Controller.java'
+    	}
+	  }
+    }
+  }
+  
+/*  basicapiClient {
+    inputFile = file("$swaggerResourcesFolder/$restServiceFile")
+    code {
+      language = 'java'
+      configFile = file("$swaggerResourcesFolder/swagger-codegen-config-client.json")
+    }
+  }
+*/
+}
+
+// Configure compile task dependency and source - SERVER
+compileJava.dependsOn swaggerSources.basicapi.code
+sourceSets.main.java.srcDir "${swaggerSources.basicapi.code.outputDir}/src/main/java"
+//sourceSets.main.resources.srcDir "${swaggerSources.basicapi.code.outputDir}/src/main/resources"
+
+// Configure compile task dependency and source - CLIENT
+//compileJava.dependsOn swaggerSources.basicapiClient.code
+//sourceSets.main.java.srcDir "${swaggerSources.basicapiClient.code.outputDir}/src/main/java"
+//sourceSets.main.resources.srcDir "${swaggerSources.basicapiClient.code.outputDir}/src/main/resources"

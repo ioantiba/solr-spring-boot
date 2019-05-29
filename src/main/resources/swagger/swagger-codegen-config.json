@@ -1,0 +1,11 @@
+{
+	"modelPackage": "org.ownbit.solrspring.generated.model",
+	"apiPackage": "org.ownbit.solrspring.generated.api",
+	"invokerPackage": "org.ownbit.solrspring.generated",
+	"library": "spring-mvc",
+	"dateLibrary": "java8",
+	"useBeanValidation": true,
+	"useTags": true,
+	"serializableModel": true,
+	"hideGenerationTimestamp": true
+}

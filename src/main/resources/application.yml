@@ -1,0 +1,17 @@
+server:
+  port: 8215
+  compression:
+    enabled: true
+
+spring:
+  profiles:
+    active: development
+  application:
+    name: solr-data
+  data:
+    solr:
+      host: http://192.168.35.98:8984/solr
+      repositories:
+        enabled: true
+  jackson:
+    default-property-inclusion: NON_NULL

@@ -1,0 +1,222 @@
+openapi: '3.0.2'
+
+################################################################################
+#                                  Info                                        #
+################################################################################
+info:
+  version: 1.0.4
+  title: Solr Data API
+  description: Solr Data Service API
+  contact:
+    name: Ioan Tiba
+    email: ioantiba@gmail.com
+    url: https://www.ownbit.org
+    
+################################################################################
+#                                           Paths                              #
+################################################################################
+
+paths:
+
+  /users:
+    get:
+      summary: Available Users
+      description: Get all available users registered
+      operationId: getUsers
+      tags:
+        - User
+      security:
+        - basicAuth: []
+      responses:
+        200:
+          $ref: '#/components/responses/UsersResponse'
+          
+  /user:
+    post:
+      security: 
+        - basicAuth: []
+      summary: Creates a new user
+      description: Register new user with details in SOLR
+      operationId: createUser
+      tags:
+        - User
+      requestBody:
+        $ref: '#/components/requestBodies/UserRequestBody'
+      responses:
+        '201':
+          description: Created
+        '500':
+          description: Internal Server Error
+          
+  /userdetails/{userId}:
+    get:
+      security:
+        - basicAuth: []
+      summary: Returns a user by ID.
+      operationId: getUser
+      tags:
+        - User
+      parameters:
+        - in: path
+          name: userId
+          schema:
+            type: string
+          required: true
+          description: Numeric ID of the user to get
+      responses: 
+        200:
+          $ref: '#/components/responses/UserResponse'
+        400:
+          description: The specified user ID is invalid (not a number).
+        404:
+          description: A user with the specified ID was not found.
+          
+  /roles:
+    get:
+      security:
+        - basicAuth: []
+      summary: Available Roles
+      description: Get all available roles registered
+      operationId: getRoles
+      tags:
+        - User
+      responses:
+        200:
+          $ref: '#/components/responses/RolesResponse'
+
+################################################################################
+#                                 Components                                   #
+################################################################################
+
+components:
+
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+ 
+  schemas:
+    UserDataDTO:
+      type: object
+      description: User Data Model
+      properties:
+        userName:
+          type: string
+          description: Username
+        password:
+          type: string
+          description: password
+        fullName:
+          type: string
+          description: Full name - First name + Middle names + Last name
+        userDetails:
+          $ref: '#/components/schemas/UserDetailsDTO'
+        roles:
+          type: array
+          items: 
+            $ref: '#/components/schemas/RoleDataDTO'
+            
+    UserDetailsDTO:
+      type: object
+      description: User Details Model
+      properties:
+        city: 
+          type: string
+          description: City
+        country: 
+          type: string
+          description: Country
+        age: 
+          type: integer
+          format: int32
+          description: Age   
+            
+    RoleDataDTO:
+      type: object
+      description: Role Data Model
+      properties:
+        roleName:
+          type: string
+          description: Username
+          
+    UsersResponseDTO:
+      type: object
+      properties:
+        users:
+          type: array
+          description: A JSON array of available users
+          items:
+            $ref: '#/components/schemas/UserDataDTO'
+            
+    UserResponseDTO:
+      type: object
+      properties:
+        user:
+          $ref: '#/components/schemas/UserDataDTO'
+            
+    RolesResponseDTO:
+      type: object
+      properties:
+        users:
+          type: array
+          description: A JSON array of available roles
+          items:
+            $ref: '#/components/schemas/RoleDataDTO'
+            
+            
+    UserRequestDTO:
+      type: object
+      description: User Request Data Transfer Object
+      properties:
+        username:
+          type: string
+          minLength: 5
+          maxLength: 20
+        password:
+          type: string
+          minLength: 6
+          maxLength: 50
+      # Both properties are required
+      required:  
+        - username
+        - password
+  
+  
+  responses:         
+    400:
+      description: Bad Request
+    401:
+      description: Unauthorized
+    403:
+      description: Forbidden
+    500:
+      description: Internal Server Error
+    UsersResponse:
+      description: Users Response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UsersResponseDTO'
+    UserResponse:
+      description: User Response
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserResponseDTO'
+    RolesResponse:
+      description: A JSON array of available roles
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/RolesResponseDTO'
+            
+  
+  requestBodies:
+    UserRequestBody:
+      description: User Request Body
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/UserRequestDTO'
+                
